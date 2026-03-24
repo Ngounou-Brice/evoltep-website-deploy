@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import emailjs from '@emailjs/browser';
 import { Send, MessageCircle, Mail, Phone, MapPin, CheckCircle2 } from 'lucide-react';
 import { useScrollAnimation, staggerContainer, fadeUp, slideLeft, slideRight } from '../hooks/useScrollAnimation';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const InputField = ({ label, name, type = 'text', value, onChange, placeholder, required }) => (
   <div>
@@ -23,6 +26,8 @@ const InputField = ({ label, name, type = 'text', value, onChange, placeholder, 
 export default function Contact() {
   const { ref, isInView } = useScrollAnimation();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -30,22 +35,44 @@ export default function Contact() {
     description: '',
   });
 
-  const handleChange = (e) => {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-  };
+  const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // In production: send to API or email service
-    setSubmitted(true);
+    setLoading(true);
+
+    try {
+      await emailjs.send(
+        "evoltep_dev",          // Your Service ID
+        "template_yu5uiby",    // Your Template ID
+        {
+          name: form.name,
+          email: form.email,
+          phone: form.phone,
+          message: form.description,
+        },
+        "gvbzrDxlRcMy3qiO5"    // Your Public Key
+      );
+
+      toast.success("✅ Message sent! We'll reply within 24h.");
+      setSubmitted(true);
+      setForm({ name: '', email: '', phone: '', description: '' });
+
+    } catch (error) {
+      console.error("EMAILJS ERROR:", error);
+      toast.error("❌ Failed to send message. Try again later.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <section id="contact" className="py-24 bg-brand-light relative overflow-hidden">
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
+      <ToastContainer position="top-right" autoClose={5000} />
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        {/* Header */}
+        {/* HEADER */}
         <motion.div
           ref={ref}
           variants={staggerContainer}
@@ -55,11 +82,10 @@ export default function Contact() {
         >
           <motion.span variants={fadeUp} className="section-label">Get In Touch</motion.span>
           <motion.h2 variants={fadeUp} className="section-title mb-4">
-            Let's Build Something{' '}
-            <span className="text-gradient">Amazing</span>
+            Let's Build Something <span className="text-gradient">Amazing</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            Tell us about your project — we typically respond within 24 hours.
+            Tell us about your project and we typically respond within 24 hours.
           </motion.p>
         </motion.div>
 
@@ -69,61 +95,41 @@ export default function Contact() {
           animate={isInView ? 'visible' : 'hidden'}
           className="grid lg:grid-cols-5 gap-10"
         >
-          {/* Contact info */}
+
+          {/* LEFT INFO */}
           <motion.div variants={slideLeft} className="lg:col-span-2 space-y-6">
             <div className="card p-6">
               <h3 className="font-display font-bold text-lg text-brand-dark mb-5">Contact Info</h3>
               <div className="space-y-4">
                 {[
-                  { icon: Mail, label: 'Email', value: 'hello@evoltep.com' },
-                  { icon: Phone, label: 'Phone', value: '+237 6XX XXX XXX' },
+                  { icon: Mail, label: 'Email', value: 'ngounoubrice05@gmail.com' },
+                  { icon: Phone, label: 'Phone', value: '+237 690 69 33 21' },
                   { icon: MapPin, label: 'Location', value: 'Yaoundé, Cameroon 🇨🇲' },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-brand-blue/10 flex items-center justify-center">
                       <Icon size={16} className="text-brand-blue" />
                     </div>
                     <div>
-                      <p className="font-body text-xs text-gray-400">{label}</p>
-                      <p className="font-body text-sm font-medium text-brand-dark">{value}</p>
+                      <p className="text-xs text-gray-400">{label}</p>
+                      <p className="text-sm font-medium text-brand-dark">{value}</p>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* WhatsApp quick contact */}
             <a
-              href="https://wa.me/237600000000?text=Hi%20Evoltep!%20I%27d%20like%20to%20discuss%20a%20project."
+              href="https://wa.me/237690693321?text=Hi%20Evoltep!%20I'd%20like%20to%20discuss%20a%20project."
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white font-display font-semibold px-6 py-4 rounded-xl transition-all duration-300 hover:shadow-lg w-full justify-center"
+              className="flex items-center gap-3 bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-4 rounded-xl transition-all hover:shadow-lg w-full justify-center"
             >
-              <MessageCircle size={20} />
-              Chat on WhatsApp
+              <MessageCircle size={20} /> Chat on WhatsApp
             </a>
-
-            {/* What to expect */}
-            <div className="card p-6">
-              <h4 className="font-display font-semibold text-brand-dark mb-4">What happens next?</h4>
-              <div className="space-y-3">
-                {[
-                  'We review your project details',
-                  'Schedule a free discovery call',
-                  'Send you a tailored proposal',
-                ].map((step, i) => (
-                  <div key={step} className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-brand-blue/10 text-brand-blue flex items-center justify-center text-xs font-display font-bold flex-shrink-0">
-                      {i + 1}
-                    </div>
-                    <span className="font-body text-sm text-gray-500">{step}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
           </motion.div>
 
-          {/* Form */}
+          {/* FORM */}
           <motion.div variants={slideRight} className="lg:col-span-3">
             <div className="card p-8">
               {submitted ? (
@@ -135,10 +141,8 @@ export default function Contact() {
                   <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
                     <CheckCircle2 size={32} className="text-green-500" />
                   </div>
-                  <h3 className="font-display font-bold text-2xl text-brand-dark mb-2">Message Sent!</h3>
-                  <p className="font-body text-gray-500">
-                    Thanks for reaching out. We'll get back to you within 24 hours.
-                  </p>
+                  <h3 className="text-2xl font-bold mb-2">Message Sent!</h3>
+                  <p className="text-gray-500">We'll get back to you within 24 hours.</p>
                   <button
                     onClick={() => setSubmitted(false)}
                     className="mt-6 btn-outline text-sm"
@@ -167,6 +171,7 @@ export default function Contact() {
                       required
                     />
                   </div>
+
                   <InputField
                     label="Phone Number"
                     name="phone"
@@ -175,9 +180,10 @@ export default function Contact() {
                     onChange={handleChange}
                     placeholder="+237 600 000 000"
                   />
+
                   <div>
-                    <label className="block font-body text-sm font-medium text-gray-700 mb-2">
-                      Project Description <span className="text-brand-blue">*</span>
+                    <label className="block text-sm font-medium mb-2">
+                      Project Description *
                     </label>
                     <textarea
                       name="description"
@@ -185,24 +191,27 @@ export default function Contact() {
                       onChange={handleChange}
                       required
                       rows={5}
-                      placeholder="Tell us about your project — what you're building, your timeline, budget range, and any specific requirements..."
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 font-body text-sm text-brand-dark placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue transition-all duration-200 bg-white resize-none"
+                      placeholder="Tell us about your project..."
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3"
                     />
                   </div>
+
                   <button
                     type="submit"
-                    className="btn-primary w-full py-4 text-base flex items-center justify-center gap-2"
+                    disabled={loading}
+                    className="btn-primary w-full py-4 flex items-center justify-center gap-2"
                   >
-                    Start My Project
+                    {loading ? "Sending..." : "Start My Project"}
                     <Send size={18} />
                   </button>
-                  <p className="font-body text-xs text-gray-400 text-center">
+                  <p className="text-xs text-gray-400 text-center">
                     No spam, ever. We take your privacy seriously.
                   </p>
                 </form>
               )}
             </div>
           </motion.div>
+
         </motion.div>
       </div>
     </section>

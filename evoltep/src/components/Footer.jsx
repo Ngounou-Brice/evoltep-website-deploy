@@ -9,7 +9,7 @@ const footerLinks = {
 };
 
 const socials = [
-  { icon: Github, href: 'https://github.com/evoltep', label: 'GitHub' },
+  { icon: Github, href: 'https://github.com/Ngounou-Brice', label: 'GitHub' },
   { icon: Linkedin, href: 'https://linkedin.com/company/evoltep', label: 'LinkedIn' },
   { icon: Twitter, href: 'https://twitter.com/evoltep', label: 'Twitter' },
 ];
@@ -38,10 +38,14 @@ export default function Footer() {
           <motion.div variants={fadeUp} className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-5">
               <div className="w-9 h-9 rounded-lg bg-brand-blue flex items-center justify-center shadow-glow">
-                <span className="text-white font-display font-bold text-base">E</span>
+                <span className="text-white font-display font-bold text-base"><img
+                  src="/logo.png"
+                  alt="Evoltep Logo"
+                  className="w-6 h-6 object-contain"
+                /></span>
               </div>
               <span className="font-display font-bold text-xl">
-                evolt<span className="text-brand-blue">ep</span>
+                Evolt<span className="text-brand-blue">ep</span>
               </span>
             </div>
             <p className="font-body text-gray-400 text-sm leading-relaxed mb-6 max-w-xs">
@@ -113,7 +117,7 @@ export default function Footer() {
             © {year} Evoltep. All rights reserved. Built with ❤️ in Cameroon 🇨🇲
           </p>
           <p className="font-body text-gray-600 text-xs">
-            Evolving Technology, Empowering People
+            Evolving Technology, Empowering People , let's innovate together! <a href="#contact" className="text-brand-blue hover:underline">Get in touch</a>
           </p>
         </div>
       </div>

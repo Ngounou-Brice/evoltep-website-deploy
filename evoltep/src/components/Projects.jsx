@@ -4,6 +4,7 @@ import { ArrowUpRight, X } from 'lucide-react';
 import { projects } from '../data';
 import { useScrollAnimation, staggerContainer, fadeUp, scaleIn } from '../hooks/useScrollAnimation';
 
+// Project Card
 const ProjectCard = ({ project, onClick }) => (
   <motion.div
     variants={scaleIn}
@@ -12,11 +13,15 @@ const ProjectCard = ({ project, onClick }) => (
     className="group cursor-pointer card overflow-hidden"
   >
     {/* Image area */}
-    <div className={`relative h-52 bg-gradient-to-br ${project.gradient} flex items-center justify-center overflow-hidden`}>
-      <span className="text-6xl">{project.icon}</span>
-      
+    <div className="relative h-52 flex items-center justify-center overflow-hidden rounded-xl">
+      <img
+        src={project.image} // Real-time project image
+        alt={project.title}
+        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+      />
+
       {/* Hover overlay */}
-      <div className="absolute inset-0 bg-brand-dark/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
+      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300">
         <div className="flex items-center gap-2 text-white font-display font-semibold">
           View Project <ArrowUpRight size={18} />
         </div>
@@ -33,7 +38,7 @@ const ProjectCard = ({ project, onClick }) => (
       <span className="section-label text-xs">{project.category}</span>
       <h3 className="font-display font-bold text-lg text-brand-dark mb-2">{project.title}</h3>
       <p className="font-body text-sm text-gray-500 mb-4 line-clamp-2">{project.description}</p>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mb-4">
         {project.tags.map((tag) => (
           <span
             key={tag}
@@ -43,10 +48,21 @@ const ProjectCard = ({ project, onClick }) => (
           </span>
         ))}
       </div>
+      {project.link && (
+        <a
+          href={project.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-outline flex items-center gap-2 text-sm w-full justify-center"
+        >
+          Open Project <ArrowUpRight size={16} />
+        </a>
+      )}
     </div>
   </motion.div>
 );
 
+// Modal for project details
 const ProjectModal = ({ project, onClose }) => (
   <motion.div
     initial={{ opacity: 0 }}
@@ -63,8 +79,12 @@ const ProjectModal = ({ project, onClose }) => (
       className="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className={`h-56 bg-gradient-to-br ${project.gradient} flex items-center justify-center relative`}>
-        <span className="text-8xl">{project.icon}</span>
+      <div className="relative h-56">
+        <img
+          src={project.image}
+          alt={project.title}
+          className="w-full h-full object-cover rounded-t-3xl"
+        />
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-9 h-9 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/30 transition-colors"
@@ -83,14 +103,22 @@ const ProjectModal = ({ project, onClose }) => (
             </span>
           ))}
         </div>
-        <button className="btn-primary w-full flex items-center justify-center gap-2">
-          Request Similar Project <ArrowUpRight size={16} />
-        </button>
+        {project.link && (
+          <a
+            href={project.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-primary w-full flex items-center justify-center gap-2"
+          >
+            Visit Project <ArrowUpRight size={16} />
+          </a>
+        )}
       </div>
     </motion.div>
   </motion.div>
 );
 
+// Main Projects Section
 export default function Projects() {
   const { ref, isInView } = useScrollAnimation();
   const [selected, setSelected] = useState(null);

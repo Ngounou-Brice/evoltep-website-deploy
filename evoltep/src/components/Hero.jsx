@@ -15,7 +15,6 @@ const FloatingCard = ({ children, className, delay = 0 }) => (
 
 const DashboardMockup = () => (
   <div className="relative w-full max-w-lg mx-auto lg:mx-0">
-    {/* Main card */}
     <motion.div
       initial={{ opacity: 0, y: 30, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -24,7 +23,7 @@ const DashboardMockup = () => (
     >
       {/* Glow effect */}
       <div className="absolute inset-0 bg-gradient-to-br from-brand-blue/20 via-transparent to-transparent pointer-events-none" />
-      
+
       {/* Header bar */}
       <div className="flex items-center gap-2 mb-5">
         <div className="w-3 h-3 rounded-full bg-red-400/80" />
@@ -35,7 +34,7 @@ const DashboardMockup = () => (
         </div>
       </div>
 
-      {/* Stats row */}
+      {/* Stats */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         {[
           { label: 'Revenue', value: '$128K', trend: '+24%', color: 'text-green-400' },
@@ -84,111 +83,59 @@ const DashboardMockup = () => (
         <span className="text-green-400">Evoltep</span>
         <span className="text-white/50">.</span>
         <span className="text-yellow-300">build</span>
-        <span className="text-white/50">({'{'}</span>
+        <span className="text-white/50">{'({'}</span>
         <span className="text-cyan-400"> fast</span>
         <span className="text-white/50">, </span>
         <span className="text-pink-400">scalable </span>
-        <span className="text-white/50">{'}'});</span>
+        <span className="text-white/50">{'})'};</span>
       </div>
     </motion.div>
-
-    {/* Floating badge: tech */}
-    <FloatingCard className="-top-4 -left-4 flex items-center gap-2" delay={0}>
-      <div className="w-8 h-8 rounded-lg bg-brand-blue/10 flex items-center justify-center">
-        <Code2 size={16} className="text-brand-blue" />
-      </div>
-      <div>
-        <p className="text-xs font-display font-bold text-brand-dark">50+ Projects</p>
-        <p className="text-xs text-gray-400 font-body">Delivered on time</p>
-      </div>
-    </FloatingCard>
-
-    {/* Floating badge: performance */}
-    <FloatingCard className="-bottom-4 -right-4 flex items-center gap-2" delay={0.2}>
-      <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center">
-        <Zap size={16} className="text-green-500" />
-      </div>
-      <div>
-        <p className="text-xs font-display font-bold text-brand-dark">99 Score</p>
-        <p className="text-xs text-gray-400 font-body">PageSpeed</p>
-      </div>
-    </FloatingCard>
-
-    {/* Floating badge: global */}
-    <FloatingCard className="top-1/2 -right-8 -translate-y-1/2 flex items-center gap-2" delay={0.15}>
-      <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-        <Globe size={16} className="text-brand-blue" />
-      </div>
-      <div>
-        <p className="text-xs font-display font-bold text-brand-dark">10+ Countries</p>
-        <p className="text-xs text-gray-400 font-body">Client reach</p>
-      </div>
-    </FloatingCard>
   </div>
 );
 
-export default function Hero() {
-  const scrollToContact = () => {
-    document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
-  };
-  const scrollToProjects = () => {
-    document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
-  };
+export default function Hero({ backgroundImage }) {
+  const scrollToContact = () => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' });
+  const scrollToProjects = () => document.querySelector('#projects')?.scrollIntoView({ behavior: 'smooth' });
 
   return (
-    <section id="home" className="relative min-h-screen flex items-center overflow-hidden bg-brand-light bg-mesh">
-      {/* Grid background */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-100" />
-      
-      {/* Glow orbs */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-brand-blue/8 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-300/10 rounded-full blur-3xl pointer-events-none" />
+    <section
+      id="home"
+      className="relative min-h-screen flex items-center overflow-hidden"
+      style={{
+        backgroundImage: `url(logo.png)`, // Replace with your actual image path})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+      }}
+    >
+      {/* Optional overlays or gradient */}
+      <div className="absolute inset-0 bg-black/20 pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-20 lg:pt-32">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left: Content */}
-          <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
+          <motion.div variants={staggerContainer} initial="hidden" animate="visible">
             <motion.div variants={fadeUp} className="mb-6">
-              <span className="inline-flex items-center gap-2 bg-brand-blue/10 text-brand-blue text-xs font-body font-semibold px-4 py-2 rounded-full border border-brand-blue/20">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-blue animate-pulse" />
-                Africa's Premier Software Engineering Studio
+              <span className="inline-flex items-center gap-2 bg-white/10 text-blue-500 text-xs font-body font-semibold px-4 py-2 rounded-full border border-white/20">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse" />
+                Let's Innovate the future together
               </span>
             </motion.div>
 
-            <motion.h1
-              variants={fadeUp}
-              className="font-display font-bold text-5xl lg:text-6xl xl:text-7xl text-brand-dark leading-[1.05] mb-6"
-            >
-              We Build{' '}
-              <span className="text-gradient">Powerful</span>
-              {' '}Digital Solutions
+            <motion.h1 variants={fadeUp} className="font-display font-bold text-5xl lg:text-6xl xl:text-7xl text-white leading-[1.05] mb-6">
+              We Build <span className="text-gradient">Powerful</span> Digital Solutions
             </motion.h1>
 
-            <motion.p
-              variants={fadeUp}
-              className="font-body text-lg text-gray-500 leading-relaxed mb-10 max-w-xl"
-            >
-              Evoltep helps startups and enterprises grow with high-performance websites, 
-              scalable applications, and cutting-edge technology — built to last.
+            <motion.p variants={fadeUp} className="font-body text-lg text-white/80 leading-relaxed mb-10 max-w-xl">
+              Evoltep helps startups and enterprises grow with high-performance websites, scalable applications, and cutting-edge technology built to last.
             </motion.p>
 
             <motion.div variants={fadeUp} className="flex flex-wrap gap-4 mb-12">
-              <button
-                onClick={scrollToProjects}
-                className="btn-primary flex items-center gap-2 text-base py-4 px-8"
-              >
+              <button onClick={scrollToProjects} className="btn-primary flex items-center gap-2 text-base py-4 px-8">
                 View Projects
                 <ArrowRight size={18} />
               </button>
-              <button
-                onClick={scrollToContact}
-                className="btn-outline flex items-center gap-2 text-base py-4 px-8"
-              >
-                <Play size={16} className="fill-brand-blue" />
+              <button onClick={scrollToContact} className="btn-outline flex items-center gap-2 text-base py-4 px-8">
+                <Play size={16} className="fill-white" />
                 Start a Project
               </button>
             </motion.div>
@@ -196,40 +143,24 @@ export default function Hero() {
             {/* Stats */}
             <motion.div variants={fadeUp} className="flex gap-8">
               {[
-                { value: '50+', label: 'Projects Delivered' },
-                { value: '40+', label: 'Happy Clients' },
-                { value: '5★', label: 'Average Rating' },
+                { value: '10+', label: 'Projects Delivered' },
+                { value: '08+', label: 'Happy Clients' },
+                { value: '4.5★', label: 'Average Rating' },
               ].map((stat) => (
                 <div key={stat.label}>
-                  <p className="font-display font-bold text-2xl text-brand-dark">{stat.value}</p>
-                  <p className="font-body text-sm text-gray-400">{stat.label}</p>
+                  <p className="font-display font-bold text-2xl text-white">{stat.value}</p>
+                  <p className="font-body text-sm text-white/70">{stat.label}</p>
                 </div>
               ))}
             </motion.div>
           </motion.div>
 
-          {/* Right: Dashboard mockup */}
+          {/* Right: Dashboard */}
           <div className="relative hidden lg:flex justify-end items-center">
             <DashboardMockup />
           </div>
         </div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <div className="w-6 h-10 border-2 border-gray-300 rounded-full flex justify-center pt-2">
-          <motion.div
-            animate={{ y: [0, 12, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
-            className="w-1 h-2 bg-brand-blue rounded-full"
-          />
-        </div>
-      </motion.div>
     </section>
   );
 }

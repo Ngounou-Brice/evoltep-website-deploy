@@ -34,21 +34,27 @@ export default function Navbar() {
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled
             ? 'bg-white/90 backdrop-blur-xl border-b border-gray-100 shadow-sm'
             : 'bg-transparent'
-        }`}
+          }`}
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
             <a href="#home" className="flex items-center gap-2 group">
               <div className="w-9 h-9 rounded-lg bg-brand-blue flex items-center justify-center shadow-glow group-hover:shadow-glow-lg transition-shadow duration-300">
-                <span className="text-white font-display font-bold text-base">E</span>
+
+                <img
+                  src="/logo.png"
+                  alt="Evoltep Logo"
+                  className="w-6 h-6 object-contain"
+                />
+
               </div>
+
               <span className="font-display font-bold text-xl text-brand-dark">
-                evolt<span className="text-brand-blue">ep</span>
+                Evolt<span className="text-brand-blue">ep</span>
               </span>
             </a>
 
@@ -58,11 +64,10 @@ export default function Navbar() {
                 <button
                   key={link.label}
                   onClick={() => handleNav(link.label, link.href)}
-                  className={`relative px-4 py-2 font-body text-sm font-medium transition-colors duration-200 rounded-lg group ${
-                    active === link.label
+                  className={`relative px-4 py-2 font-body text-sm font-medium transition-colors duration-200 rounded-lg group ${active === link.label
                       ? 'text-brand-blue'
                       : 'text-gray-600 hover:text-brand-dark'
-                  }`}
+                    }`}
                 >
                   {link.label}
                   {active === link.label && (
