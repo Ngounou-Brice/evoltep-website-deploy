@@ -85,8 +85,12 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def is_admin_request():
+    # If no API key is configured, allow all admin requests
+    if not ADMIN_API_KEY:
+        return True
+    # If API key is configured, check it
     key = request.headers.get("X-API-KEY") or request.args.get("api_key")
-    return bool(ADMIN_API_KEY and key and key == ADMIN_API_KEY)
+    return bool(key and key == ADMIN_API_KEY)
 
 def require_admin():
     if not is_admin_request():
