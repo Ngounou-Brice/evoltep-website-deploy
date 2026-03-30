@@ -172,8 +172,8 @@ export default function App() {
             }
           />
 
-          {/* Admin Page (password protected) */}
-          <Route path="/admin" element={<AdminAccess />} />
+          {/* Admin Routes (nested) */}
+          <Route path="/admin/*" element={<AdminAccess />} />
         </Routes>
       )}
     </Router>

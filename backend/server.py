@@ -2,6 +2,7 @@ from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 import json
 import os
+from datetime import datetime
 from werkzeug.utils import secure_filename
 
 # EMAIL IMPORTS
@@ -45,7 +46,9 @@ default_data = {
             "year": 2026,
             "link": ""
         }
-    ]
+    ],
+    "blogs": [],  # Add blogs array
+    "subscribers": []
 }
 
 # ---------------- LOAD DATA ---------------- #
@@ -217,6 +220,136 @@ def delete_project(project_id):
     save_data()
 
     return jsonify({"success": True})
+
+
+# ---------------- BLOGS ---------------- #
+
+def get_next_blog_id():
+    if data["blogs"]:
+        return max(blog["id"] for blog in data["blogs"]) + 1
+    return 1
+
+# ADD BLOG
+@app.route("/api/blogs", methods=["POST"])
+def add_blog():
+    auth = require_admin()
+    if auth is not None:
+        return auth
+    blog = request.form.to_dict()
+
+    if not blog.get("title") or not blog.get("content"):
+        return jsonify({"success": False, "error": "Title and content are required"}), 400
+
+    blog["id"] = get_next_blog_id()
+    blog["created_at"] = str(datetime.now())
+
+    # Handle image upload for blog
+    if "image" in request.files:
+        file = request.files["image"]
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            blog["image"] = f"/{UPLOAD_FOLDER}/{filename}"
+
+    data["blogs"].append(blog)
+    save_data()
+    return jsonify({"success": True, "blog": blog})
+
+# UPDATE BLOG
+@app.route("/api/blogs/<int:blog_id>", methods=["PUT"])
+def update_blog(blog_id):
+    auth = require_admin()
+    if auth is not None:
+        return auth
+    blog = next((b for b in data["blogs"] if b["id"] == blog_id), None)
+    if not blog:
+        return jsonify({"success": False}), 404
+
+    updated_blog = request.form.to_dict()
+
+    # Handle image upload for blog
+    if "image" in request.files:
+        file = request.files["image"]
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+            updated_blog["image"] = f"/{UPLOAD_FOLDER}/{filename}"
+
+    blog.update(updated_blog)
+    save_data()
+    return jsonify({"success": True, "blog": blog})
+
+# DELETE BLOG
+@app.route("/api/blogs/<int:blog_id>", methods=["DELETE"])
+def delete_blog(blog_id):
+    auth = require_admin()
+    if auth is not None:
+        return auth
+    blog = next((b for b in data["blogs"] if b["id"] == blog_id), None)
+
+    if not blog:
+        return jsonify({"success": False}), 404
+
+    data["blogs"].remove(blog)
+    save_data()
+    return jsonify({"success": True})
+
+
+# ---------------- BULK EMAIL ---------------- #
+@app.route("/api/send-bulk-email", methods=["POST"])
+def send_bulk_email():
+    auth = require_admin()
+    if auth is not None:
+        return auth
+
+    data_req = request.json
+    subject = data_req.get("subject")
+    message = data_req.get("message")
+    recipient = data_req.get("recipient", "all")
+
+    if not subject or not message:
+        return jsonify({"success": False, "error": "Subject and message are required"}), 400
+
+    if not EMAIL_USER or not EMAIL_PASS:
+        return jsonify({"success": False, "error": "Email not configured"}), 500
+
+    try:
+        recipients = []
+        if recipient == "all":
+            recipients = [sub["email"] for sub in data.get("subscribers", [])]
+        else:
+            recipients = [recipient]
+
+        if not recipients:
+            return jsonify({"success": False, "error": "No recipients found"}), 400
+
+        # Send to all recipients
+        for email in recipients:
+            msg = MIMEMultipart()
+            msg["From"] = EMAIL_USER
+            msg["To"] = email
+            msg["Subject"] = subject
+
+            body = f"""
+{message}
+
+---
+This email was sent from Evoltep website.
+If you no longer wish to receive these emails, please contact us.
+"""
+            msg.attach(MIMEText(body, "plain"))
+
+            server = smtplib.SMTP("smtp.gmail.com", 587)
+            server.starttls()
+            server.login(EMAIL_USER, EMAIL_PASS)
+            server.sendmail(EMAIL_USER, email, msg.as_string())
+            server.quit()
+
+        return jsonify({"success": True, "sent_to": len(recipients)})
+
+    except Exception as e:
+        print(f"Email error: {e}")
+        return jsonify({"success": False, "error": "Failed to send emails"}), 500
 
 
 # ---------------- CONTACT (EMAIL) ---------------- #
