@@ -29,6 +29,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 EMAIL_USER = os.getenv("EMAIL_USER")
 EMAIL_PASS = os.getenv("EMAIL_PASS")
+ADMIN_API_KEY = os.getenv("ADMIN_API_KEY", "")
 
 # ---------------- DEFAULT DATA ---------------- #
 default_data = {
@@ -80,12 +81,43 @@ def get_next_project_id():
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def is_admin_request():
+    key = request.headers.get("X-API-KEY") or request.args.get("api_key")
+    return bool(ADMIN_API_KEY and key and key == ADMIN_API_KEY)
+
+def require_admin():
+    if not is_admin_request():
+        return jsonify({"success": False, "error": "Unauthorized"}), 401
+
 # ---------------- ROUTES ---------------- #
 
 # GET all data
 @app.route("/api/data", methods=["GET"])
 def get_data():
     return jsonify(data)
+
+# UPLOAD Image (Admin)
+@app.route("/api/projects/upload", methods=["POST"])
+def upload_project_image():
+    auth = require_admin()
+    if auth is not None:
+        return auth
+
+    file = request.files.get("image")
+    if not file or not allowed_file(file.filename):
+        return jsonify({"success": False, "error": "Image file required"}), 400
+
+    filename = secure_filename(file.filename)
+    # randomize to avoid duplicates
+    import uuid
+    unique_name = f"{uuid.uuid4().hex}_{filename}"
+    file.save(os.path.join(app.config["UPLOAD_FOLDER"], unique_name))
+
+    image_path = f"/{UPLOAD_FOLDER}/{unique_name}"
+    # full URL of uploaded image
+    image_url = request.host_url.rstrip("/") + image_path
+
+    return jsonify({"success": True, "image": image_path, "imageUrl": image_url})
 
 # ---------------- HERO ---------------- #
 @app.route("/api/hero", methods=["POST"])
@@ -109,6 +141,9 @@ def update_hero():
 # ADD PROJECT
 @app.route("/api/projects", methods=["POST"])
 def add_project():
+    auth = require_admin()
+    if auth is not None:
+        return auth
     project = request.form.to_dict()
 
     if not project.get("title"):
@@ -142,6 +177,9 @@ def add_project():
 # UPDATE PROJECT
 @app.route("/api/projects/<int:project_id>", methods=["PUT"])
 def update_project(project_id):
+    auth = require_admin()
+    if auth is not None:
+        return auth
     project = next((p for p in data["projects"] if p["id"] == project_id), None)
 
     if not project:
@@ -167,6 +205,9 @@ def update_project(project_id):
 # DELETE PROJECT
 @app.route("/api/projects/<int:project_id>", methods=["DELETE"])
 def delete_project(project_id):
+    auth = require_admin()
+    if auth is not None:
+        return auth
     project = next((p for p in data["projects"] if p["id"] == project_id), None)
 
     if not project:
@@ -246,7 +287,9 @@ def subscribe():
 
 @app.route("/api/subscribers", methods=["GET"])
 def get_subscribers():
-    # Admin can fetch subscribers list (no auth for now)
+    auth = require_admin()
+    if auth is not None:
+        return auth
     return jsonify({"subscribers": data.get("subscribers", [])})
 
 
