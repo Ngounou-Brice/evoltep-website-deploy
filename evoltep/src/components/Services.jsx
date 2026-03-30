@@ -26,11 +26,11 @@ export default function Services() {
             <span className="text-gradient">Growth</span>
           </motion.h2>
           <motion.p variants={fadeUp} className="font-body text-gray-500 text-lg max-w-xl mx-auto">
-            From concept to deployment — we cover every layer of your digital product.
+            From concept to deployment we cover every layer of your digital product.
           </motion.p>
         </motion.div>
 
-        {/* Services list — alternating layout */}
+        {/* Services list alternating layout */}
         <div className="space-y-16">
           {services.map((service, index) => {
             const isEven = index % 2 === 0;

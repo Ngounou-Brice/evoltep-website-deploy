@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import emailjs from '@emailjs/browser';
 import { Send, MessageCircle, Mail, Phone, MapPin, CheckCircle2 } from 'lucide-react';
-import { useScrollAnimation, staggerContainer, fadeUp, slideLeft, slideRight } from '../hooks/useScrollAnimation';
+import { staggerContainer, fadeUp, slideLeft, slideRight, useScrollAnimation } from '../hooks/useScrollAnimation';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import axios from 'axios';
+import { API_BASE } from '../utils/api';
 
+// Reusable Input Field Component
 const InputField = ({ label, name, type = 'text', value, onChange, placeholder, required }) => (
   <div>
     <label className="block font-body text-sm font-medium text-gray-700 mb-2">
@@ -27,39 +29,26 @@ export default function Contact() {
   const { ref, isInView } = useScrollAnimation();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-
   const [form, setForm] = useState({
     name: '',
     email: '',
     phone: '',
-    description: '',
+    message: '',
   });
 
-  const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  const handleChange = (e) => setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      await emailjs.send(
-        "evoltep_dev",          // Your Service ID
-        "template_yu5uiby",    // Your Template ID
-        {
-          name: form.name,
-          email: form.email,
-          phone: form.phone,
-          message: form.description,
-        },
-        "gvbzrDxlRcMy3qiO5"    // Your Public Key
-      );
+      await axios.post(`${API_BASE}/contact`, form);
 
       toast.success("✅ Message sent! We'll reply within 24h.");
       setSubmitted(true);
-      setForm({ name: '', email: '', phone: '', description: '' });
-
+      setForm({ name: '', email: '', phone: '', message: '' });
     } catch (error) {
-      console.error("EMAILJS ERROR:", error);
+      console.error("Email sending failed:", error);
       toast.error("❌ Failed to send message. Try again later.");
     } finally {
       setLoading(false);
@@ -68,9 +57,7 @@ export default function Contact() {
 
   return (
     <section id="contact" className="py-24 bg-brand-light relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-blue/5 rounded-full blur-3xl pointer-events-none" />
       <ToastContainer position="top-right" autoClose={5000} />
-
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         {/* HEADER */}
         <motion.div
@@ -95,7 +82,6 @@ export default function Contact() {
           animate={isInView ? 'visible' : 'hidden'}
           className="grid lg:grid-cols-5 gap-10"
         >
-
           {/* LEFT INFO */}
           <motion.div variants={slideLeft} className="lg:col-span-2 space-y-6">
             <div className="card p-6">
@@ -182,12 +168,10 @@ export default function Contact() {
                   />
 
                   <div>
-                    <label className="block text-sm font-medium mb-2">
-                      Project Description *
-                    </label>
+                    <label className="block text-sm font-medium mb-2">Project Description *</label>
                     <textarea
-                      name="description"
-                      value={form.description}
+                      name="message"
+                      value={form.message}
                       onChange={handleChange}
                       required
                       rows={5}
@@ -211,7 +195,6 @@ export default function Contact() {
               )}
             </div>
           </motion.div>
-
         </motion.div>
       </div>
     </section>

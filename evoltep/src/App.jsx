@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import TechBanner from './components/TechBanner';
@@ -12,11 +14,14 @@ import About from './components/About';
 import Contact from './components/Contact';
 import Footer from './components/Footer';
 
+import AdminAccess from './pages/AdminAccess'; // NEW: import the admin wrapper
+
 // Page loader
+
 const Loader = ({ onDone }) => {
   useEffect(() => {
-    const t = setTimeout(onDone, 1800);
-    return () => clearTimeout(t);
+    const timer = setTimeout(onDone, 1800);
+    return () => clearTimeout(timer);
   }, [onDone]);
 
   return (
@@ -25,22 +30,40 @@ const Loader = ({ onDone }) => {
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       className="fixed inset-0 z-[100] bg-brand-dark flex flex-col items-center justify-center"
     >
-      {/* Animated logo */}
+      {/* Logo Animation */}
       <motion.div
-        initial={{ scale: 0.5, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        initial={{ scale: 0.5, rotate: -45, opacity: 0 }}
+        animate={{ scale: 1, rotate: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="flex flex-col items-center gap-4"
       >
-        <div className="w-16 h-16 rounded-2xl bg-brand-blue shadow-glow-lg flex items-center justify-center">
-          <span className="text-white font-display font-bold text-3xl">E</span>
-        </div>
-        <span className="font-display font-bold text-2xl text-white">
+        <motion.div
+          className="w-16 h-16 rounded-2xl bg-brand-blue shadow-glow-lg flex items-center justify-center"
+          initial={{ rotate: 0 }}
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1.2, ease: "linear" }}
+        >
+          <motion.span
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.5, duration: 0.5, ease: "easeOut" }}
+            className="text-white font-display font-bold text-3xl"
+          >
+            <img src="/logo2.png" alt="Evolt" className="w-6 h-6 object-contain"  />
+          </motion.span>
+        </motion.div>
+
+        <motion.span
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.5, ease: "easeOut" }}
+          className="font-display font-bold text-2xl text-white"
+        >
           evolt<span className="text-brand-blue">ep</span>
-        </span>
+        </motion.span>
       </motion.div>
 
-      {/* Progress bar */}
+      {/* Progress Bar */}
       <div className="mt-12 w-48 h-0.5 bg-white/10 rounded-full overflow-hidden">
         <motion.div
           initial={{ width: '0%' }}
@@ -50,10 +73,11 @@ const Loader = ({ onDone }) => {
         />
       </div>
 
+      {/* Tagline */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
+        transition={{ delay: 0.8 }}
         className="mt-4 font-body text-xs text-gray-500 tracking-widest uppercase"
       >
         Evolving Technology
@@ -62,10 +86,10 @@ const Loader = ({ onDone }) => {
   );
 };
 
-// Floating WhatsApp button
+// WhatsApp Button
 const WhatsAppBtn = () => (
   <motion.a
-    href="https://wa.me/237600000000?text=Hi%20Evoltep!%20I%27d%20like%20to%20discuss%20a%20project."
+    href="https://wa.me/237690693321?text=Hi%20Evoltep!%20I%27d%20like%20to%20discuss%20a%20project."
     target="_blank"
     rel="noopener noreferrer"
     initial={{ scale: 0, opacity: 0 }}
@@ -83,7 +107,7 @@ const WhatsAppBtn = () => (
   </motion.a>
 );
 
-// Scroll to top button
+// Scroll to top
 const ScrollTopBtn = () => {
   const [show, setShow] = useState(false);
 
@@ -117,32 +141,41 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   return (
-    <>
-      <AnimatePresence>{loading && <Loader onDone={() => setLoading(false)} />}</AnimatePresence>
+    <Router>
+      <AnimatePresence>
+        {loading && <Loader onDone={() => setLoading(false)} />}
+      </AnimatePresence>
 
       {!loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.4 }}
-        >
-          <Navbar />
-          <main>
-            <Hero />
-            <TechBanner />
-            <Projects />
-            <Services />
-            <WhyUs />
-            <Process />
-            <Testimonials />
-            <About />
-            <Contact />
-          </main>
-          <Footer />
-          <WhatsAppBtn />
-          <ScrollTopBtn />
-        </motion.div>
+        <Routes>
+          {/* Public Website */}
+          <Route
+            path="/"
+            element={
+              <>
+                <Navbar />
+                <main>
+                  <Hero />
+                  <TechBanner />
+                  <Projects />
+                  <Services />
+                  <WhyUs />
+                  {/* <Process /> */}
+                  <Testimonials />
+                  <About />
+                  <Contact />
+                </main>
+                <Footer />
+                <WhatsAppBtn />
+                <ScrollTopBtn />
+              </>
+            }
+          />
+
+          {/* Admin Page (password protected) */}
+          <Route path="/admin" element={<AdminAccess />} />
+        </Routes>
       )}
-    </>
+    </Router>
   );
 }

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, X } from 'lucide-react';
-import { projects } from '../data';
 import { useScrollAnimation, staggerContainer, fadeUp, scaleIn } from '../hooks/useScrollAnimation';
+import axios from 'axios';
+import { API_BASE, getImageUrl } from '../utils/api';
 
 // Project Card
 const ProjectCard = ({ project, onClick }) => (
@@ -15,7 +16,7 @@ const ProjectCard = ({ project, onClick }) => (
     {/* Image area */}
     <div className="relative h-52 flex items-center justify-center overflow-hidden rounded-xl">
       <img
-        src={project.image} // Real-time project image
+        src={getImageUrl(project.image)}
         alt={project.title}
         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
       />
@@ -38,16 +39,6 @@ const ProjectCard = ({ project, onClick }) => (
       <span className="section-label text-xs">{project.category}</span>
       <h3 className="font-display font-bold text-lg text-brand-dark mb-2">{project.title}</h3>
       <p className="font-body text-sm text-gray-500 mb-4 line-clamp-2">{project.description}</p>
-      <div className="flex flex-wrap gap-2 mb-4">
-        {project.tags.map((tag) => (
-          <span
-            key={tag}
-            className="bg-brand-light text-brand-blue text-xs font-body font-medium px-3 py-1 rounded-full border border-brand-blue/20"
-          >
-            {tag}
-          </span>
-        ))}
-      </div>
       {project.link && (
         <a
           href={project.link}
@@ -81,7 +72,7 @@ const ProjectModal = ({ project, onClose }) => (
     >
       <div className="relative h-56">
         <img
-          src={project.image}
+          src={getImageUrl(project.image)}
           alt={project.title}
           className="w-full h-full object-cover rounded-t-3xl"
         />
@@ -96,13 +87,6 @@ const ProjectModal = ({ project, onClose }) => (
         <span className="section-label">{project.category}</span>
         <h2 className="font-display font-bold text-2xl text-brand-dark mb-3">{project.title}</h2>
         <p className="font-body text-gray-500 mb-6 leading-relaxed">{project.description}</p>
-        <div className="flex flex-wrap gap-2 mb-6">
-          {project.tags.map((tag) => (
-            <span key={tag} className="bg-brand-light text-brand-blue text-sm font-body font-medium px-3 py-1.5 rounded-full border border-brand-blue/20">
-              {tag}
-            </span>
-          ))}
-        </div>
         {project.link && (
           <a
             href={project.link}
@@ -122,6 +106,28 @@ const ProjectModal = ({ project, onClose }) => (
 export default function Projects() {
   const { ref, isInView } = useScrollAnimation();
   const [selected, setSelected] = useState(null);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const { data } = await axios.get(`${API_BASE}/data`);
+        setProjects(data.projects || []);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading projects:", err);
+        setError("Failed to load projects. Using fallback data.");
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) return <p className="text-center py-12">Loading projects...</p>;
 
   return (
     <section id="projects" className="py-24 bg-white relative">

@@ -1,0 +1,15 @@
+{
+    "heroTitle": "We Build Powerful Digital Solutions",
+    "heroBg": "",
+    "projects": [
+        {
+            "id": 1,
+            "title": "Project One",
+            "description": "This is an example project.",
+            "image": "/uploads/default-project.png",
+            "category": "Web Development",
+            "year": 2026,
+            "link": ""
+        }
+    ]
+}
