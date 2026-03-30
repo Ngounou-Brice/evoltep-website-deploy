@@ -5,6 +5,7 @@ import { API_BASE, getImageUrl } from "../utils/api";
 export default function AdminPage() {
   const [heroTitle, setHeroTitle] = useState("");
   const [projects, setProjects] = useState([]);
+  const [apiKey, setApiKey] = useState(""); // Add API key state
 
   const [newProject, setNewProject] = useState({
     title: "",
@@ -30,29 +31,49 @@ export default function AdminPage() {
 
   // Update Hero
   const saveHero = async () => {
+    if (!apiKey) return alert("API Key is required");
     try {
-      await axios.post(`${API_BASE}/hero`, { heroTitle });
+      await axios.post(`${API_BASE}/hero`, { heroTitle }, { headers: { 'X-API-KEY': apiKey } });
       alert("Hero updated!");
     } catch (err) {
       console.error("Error updating hero:", err);
-      alert("Failed to update hero.");
+      alert("Failed to update hero. Check API Key and try again.");
     }
   };
 
   // Add Project
   const addProject = async () => {
+    if (!apiKey) return alert("API Key is required");
     if (!newProject.title) return alert("Title is required");
+
+    let imageUrl = "";
+    if (newProject.image) {
+      // Upload image first
+      const uploadFormData = new FormData();
+      uploadFormData.append("image", newProject.image);
+      try {
+        const uploadRes = await axios.post(`${API_BASE}/projects/upload`, uploadFormData, { headers: { 'X-API-KEY': apiKey } });
+        if (uploadRes.data.success) {
+          imageUrl = uploadRes.data.imageUrl;
+        } else {
+          return alert("Failed to upload image: " + uploadRes.data.error);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        return alert("Failed to upload image.");
+      }
+    }
 
     const formData = new FormData();
     formData.append("title", newProject.title);
     formData.append("description", newProject.description);
     formData.append("category", newProject.category);
     formData.append("year", newProject.year);
-    formData.append("link", newProject.link); // append link
-    if (newProject.image) formData.append("image", newProject.image);
+    formData.append("link", newProject.link);
+    if (imageUrl) formData.append("image", imageUrl);
 
     try {
-      const { data } = await axios.post(`${API_BASE}/projects`, formData);
+      const { data } = await axios.post(`${API_BASE}/projects`, formData, { headers: { 'X-API-KEY': apiKey } });
       if (data.success) {
         setProjects((prev) => [...prev, data.project]);
         setNewProject({ title: "", description: "", category: "", year: new Date().getFullYear(), image: null, link: "" });
@@ -65,8 +86,9 @@ export default function AdminPage() {
 
   // Delete Project
   const deleteProject = async (id) => {
+    if (!apiKey) return alert("API Key is required");
     try {
-      await axios.delete(`${API_BASE}/projects/${id}`);
+      await axios.delete(`${API_BASE}/projects/${id}`, { headers: { 'X-API-KEY': apiKey } });
       setProjects((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
       console.error(err);
@@ -76,16 +98,35 @@ export default function AdminPage() {
 
   // Update Project
   const updateProject = async (proj) => {
+    if (!apiKey) return alert("API Key is required");
+    let imageUrl = proj.image;
+    if (proj.image instanceof File) {
+      // Upload new image
+      const uploadFormData = new FormData();
+      uploadFormData.append("image", proj.image);
+      try {
+        const uploadRes = await axios.post(`${API_BASE}/projects/upload`, uploadFormData, { headers: { 'X-API-KEY': apiKey } });
+        if (uploadRes.data.success) {
+          imageUrl = uploadRes.data.imageUrl;
+        } else {
+          return alert("Failed to upload image: " + uploadRes.data.error);
+        }
+      } catch (err) {
+        console.error("Upload error:", err);
+        return alert("Failed to upload image.");
+      }
+    }
+
     const formData = new FormData();
     formData.append("title", proj.title);
     formData.append("description", proj.description);
     formData.append("category", proj.category);
     formData.append("year", proj.year);
-    formData.append("link", proj.link); // append link
-    if (proj.image instanceof File) formData.append("image", proj.image);
+    formData.append("link", proj.link);
+    formData.append("image", imageUrl);
 
     try {
-      const { data } = await axios.put(`${API_BASE}/projects/${proj.id}`, formData);
+      const { data } = await axios.put(`${API_BASE}/projects/${proj.id}`, formData, { headers: { 'X-API-KEY': apiKey } });
       if (data.success) {
         setProjects((prev) =>
           prev.map((p) => (p.id === proj.id ? { ...p, ...data.project } : p))
@@ -101,6 +142,19 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-8">
       <h1 className="text-4xl font-bold mb-12 text-center text-brand-blue">Admin Dashboard</h1>
+
+      {/* API Key Input */}
+      <section className="bg-gray-800 p-6 rounded-lg mb-10 shadow-lg hover:shadow-xl transition-shadow">
+        <h2 className="text-2xl mb-4 font-semibold text-red-400">Admin API Key</h2>
+        <input
+          type="password"
+          value={apiKey}
+          onChange={(e) => setApiKey(e.target.value)}
+          className="p-3 w-full text-black rounded-lg mb-4 shadow-inner focus:outline-none focus:ring-2 focus:ring-red-400"
+          placeholder="Enter Admin API Key"
+        />
+        <p className="text-sm text-gray-400">Required for all admin actions (add, update, delete projects, update hero, view subscribers).</p>
+      </section>
 
       {/* Hero Section */}
       <section className="bg-gray-800 p-6 rounded-lg mb-10 shadow-lg hover:shadow-xl transition-shadow">
