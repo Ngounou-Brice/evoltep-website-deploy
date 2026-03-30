@@ -61,6 +61,12 @@ else:
 with open(DATA_FILE, "w") as f:
     json.dump(data, f, indent=4)
 
+# Ensure subscribers list exists (for subscription feature)
+if "subscribers" not in data:
+    data["subscribers"] = []
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=4)
+
 # ---------------- HELPERS ---------------- #
 def save_data():
     with open(DATA_FILE, "w") as f:
@@ -185,6 +191,9 @@ def send_email():
     if not name or not email or not message:
         return jsonify({"success": False, "error": "Missing fields"}), 400
 
+    if not EMAIL_USER or not EMAIL_PASS:
+        return jsonify({"success": False, "error": "Email not configured"}), 500
+
     try:
         msg = MIMEMultipart()
         msg["From"] = EMAIL_USER
@@ -192,7 +201,7 @@ def send_email():
         msg["Subject"] = f"New Message from {name}"
 
         body = f"""
-New Project Request 🚀
+New Message from your website:
 
 Name: {name}
 Email: {email}
@@ -214,7 +223,31 @@ Message:
 
     except Exception as e:
         print("EMAIL ERROR:", e)
-        return jsonify({"success": False}), 500
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/subscribe", methods=["POST"])
+def subscribe():
+    data_req = request.json
+    email = data_req.get("email")
+    name = data_req.get("name", "")
+
+    if not email:
+        return jsonify({"success": False, "error": "Email required"}), 400
+
+    if email in data.get("subscribers", []):
+        return jsonify({"success": True, "message": "Already subscribed"})
+
+    data.setdefault("subscribers", []).append({"email": email, "name": name})
+    save_data()
+
+    return jsonify({"success": True, "message": "Subscribed successfully"})
+
+
+@app.route("/api/subscribers", methods=["GET"])
+def get_subscribers():
+    # Admin can fetch subscribers list (no auth for now)
+    return jsonify({"subscribers": data.get("subscribers", [])})
 
 
 # ---------------- SERVE IMAGES ---------------- #
